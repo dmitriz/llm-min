@@ -1,10 +1,11 @@
 """Tests for text_chat module."""
+import sys
 from pathlib import Path
 from text_chat import text_chat, DEFAULT_MODEL
 
-# Simple and clean - just read the key directly
-secrets_file = Path(__file__).parent.parent / ".secrets" / "openai.py"
-OPENAI_API_KEY = secrets_file.read_text().split('"')[1]
+# Simple import of API key
+sys.path.append(str(Path(__file__).parents[1] / ".secrets"))
+from openai import OPENAI_API_KEY
 
 def test_openai_chat():
     """Test OpenAI API integration with default model."""
