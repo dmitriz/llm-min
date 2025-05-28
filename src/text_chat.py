@@ -1,4 +1,4 @@
-import requests
+import httpx
 import json
 
 # Constants
@@ -41,7 +41,7 @@ def send_http_request(request_object):
   Returns:
     str: Response content from OpenAI
   """
-  response = requests.request(**request_object)
+  response = httpx.request(**request_object)
   response.raise_for_status()
   return response.json()["choices"][0]["message"]["content"]
 
