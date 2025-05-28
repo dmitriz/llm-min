@@ -35,8 +35,8 @@ def text_chat(api_key, model, provider="openai"):
                 json={
                     "model": model,
                     "messages": [{"role": "user", "content": message}]
-                }
-            )
+                }, 
+            timeout=60)
             response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"]
 
