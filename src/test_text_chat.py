@@ -1,30 +1,36 @@
-from text_chat import text_chat, DEFAULT_MODEL
+"""Tests for text_chat module."""
 import sys
 import os
-from .secrets.openai import OPENAI_API_KEY
+from pathlib import Path
 
-# Constants
-TEST_MESSAGE = "Hello, OpenAI! Please respond with a brief greeting."
-EXPECTED_MIN_RESPONSE_LENGTH = 5
+# Add src to path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root / "src"))
+
+from text_chat import text_chat, DEFAULT_MODEL
+
+# Import API key
+secrets_file = project_root / ".secrets" / "openai.py"
+secrets_globals = {}
+with open(secrets_file, 'r') as f:
+    exec(f.read(), secrets_globals)
+OPENAI_API_KEY = secrets_globals['OPENAI_API_KEY']
+
 
 def test_openai_chat():
-  """Test OpenAI API integration with default model"""
-  chat = text_chat(OPENAI_API_KEY, model=DEFAULT_MODEL)
-  result = chat(TEST_MESSAGE)
-  
-  assert isinstance(result, str)
-  assert len(result) > EXPECTED_MIN_RESPONSE_LENGTH
-  print(f"✅ OpenAI test passed. Response: {result}")
-
-if __name__ == "__main__":
-  # Run test directly
-  print("Running OpenAI test...")
-  
-  try:
-    test_openai_chat()
-    print("🎉 Test passed!")
+    """Test OpenAI API integration with default model."""
+    chat = text_chat(OPENAI_API_KEY, model=DEFAULT_MODEL)
+    result = chat("Hello, OpenAI! Please respond with a brief greeting.")
     
-  except Exception as e:
-    print(f"❌ Test failed: {e}")
-    import traceback
-    traceback.print_exc()
+    assert isinstance(result, str)
+    assert len(result) > 5
+    assert result.strip()  # Ensure response is not just whitespace
+
+
+def test_chat_with_custom_model():
+    """Test chat with explicit model specification."""
+    chat = text_chat(OPENAI_API_KEY, model="gpt-3.5-turbo")
+    result = chat("Say 'test passed' if you can read this.")
+    
+    assert isinstance(result, str)
+    assert len(result) > 0
