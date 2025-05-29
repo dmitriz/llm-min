@@ -11,8 +11,7 @@ load_dotenv()
 # Get OpenAI API key from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
-    pytest.skip("OPENAI_API_KEY environment variable not set")
-  raise EnvironmentError("OPENAI_API_KEY not found. Create .env file with OPENAI_API_KEY=your_key")
+  pytest.skip("OPENAI_API_KEY environment variable not set")
 
 
 def test_openai_wrapper_basic():
