@@ -21,3 +21,8 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --tb=short"
+
+[dependency-groups]
+dev = [
+    "isort>=6.0.1",
+]

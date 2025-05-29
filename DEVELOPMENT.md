@@ -6,6 +6,57 @@
 
 UV is faster, more reliable, and provides better dependency resolution than pip.
 
+## What is UV?
+
+UV is a modern, fast Python package manager - think of it as a better replacement for pip. It's much faster and handles dependencies better.
+
+## Basic Setup (Required)
+
+```bash
+# Install your project dependencies
+uv sync
+```
+
+## Optional Development Tools
+
+### Currently installed tools
+
+#### isort (Import Organizer) - INSTALLED
+
+- **Purpose**: Sorts your import statements in a standard order
+- **When to use**: When you have many imports and want them organized
+- **Command**: `uv run isort src/`
+- **Example**: Puts standard library imports first, then third-party, then your own modules
+
+### Additional tools you can install if needed
+
+#### ruff (Code Checker + Formatter) - OPTIONAL
+
+- **Purpose**: Finds bugs that unit tests might miss (see ruff_examples.py for examples)
+- **Real bugs it catches**: Mutable default arguments, security issues with eval(), resource leaks
+- **Install**: `uv add --dev ruff`
+- **Command**: `uv run ruff check src/`
+
+#### black (Code Formatter) - OPTIONAL  
+
+- **Purpose**: Makes code look consistent (see black_examples.py for before/after)
+- **When useful**: When code becomes hard to read due to inconsistent formatting
+- **Install**: `uv add --dev black`
+- **Command**: `uv run black src/`
+
+## Do You Need These Tools?
+
+**For your current simple project**: Probably not necessary
+
+**You should consider them when**:
+
+- Your project has multiple files
+- You're working with others
+- You want to catch bugs early
+- You want professional-looking code
+
+The tools are configured to use 2-space indentation to match your preference.
+
 ### Installation Commands
 
 ```bash
@@ -84,12 +135,14 @@ uv run python -c "from src.text_chat import text_chat; print('Library loaded!')"
 ### Never use pip directly
 
 Instead of:
+
 ```bash
 pip install package-name
 python -m pytest
 ```
 
 Always use:
+
 ```bash
 uv add package-name
 uv run pytest
