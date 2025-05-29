@@ -1,5 +1,6 @@
-import httpx
 import json
+
+import httpx
 
 # Constants
 DEFAULT_MODEL = "gpt-4o-mini"  # Cheapest OpenAI model
