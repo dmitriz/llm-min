@@ -1,0 +1,26 @@
+# PR Agent Configuration
+# This file configures how PR reviews and code suggestions work
+
+[pr_code_suggestions]
+extra_instructions = """
+Respect the project's existing 2-space indentation style.
+Do not suggest changing indentation to 4 spaces even if it differs from PEP 8.
+The project has standardized on 2-space indentation for readability with the specific editor setup and display constraints.
+Focus on code logic, structure, and functionality rather than indentation style.
+Maintain consistency with the existing codebase formatting.
+"""
+
+[pr_description]
+extra_instructions = """
+This project uses 2-space indentation as a deliberate choice for better readability in certain development environments.
+"""
+
+[pr_reviewer]
+extra_instructions = """
+When reviewing code, focus on:
+- Logic and functionality
+- Security and performance
+- Code structure and maintainability
+- Documentation and comments
+Do not flag 2-space indentation as an issue - this is the project standard.
+"""

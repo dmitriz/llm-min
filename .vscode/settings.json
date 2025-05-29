@@ -1,0 +1,6 @@
+{
+  "coderabbit.enableAutoReview": false,
+  "coderabbit.autoReviewOnCommit": false,
+  "coderabbit.enableCommitHooks": false,
+  "coderabbit.autoReviewMode": "disabled"
+}

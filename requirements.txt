@@ -1,2 +1,4 @@
-openai>=1.0.0
-requests>=2.25.0
+httpx>=0.28.1
+
+# Development dependencies for code formatting and linting
+isort>=5.12.0
