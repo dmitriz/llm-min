@@ -1,13 +1,14 @@
 """OpenAI API wrapper with direct dictionary input/output."""
-import httpx
-from pydantic import BaseModel, ValidationError
-from typing import List, Dict, Any, Optional
+import httpx  # HTTP client for making API requests
+from pydantic import BaseModel, ValidationError  # Data validation and parsing
+from typing import List, Dict, Any, Optional, Union  # Type hints
 
 
 class Message(BaseModel):
-  """Single message in the conversation."""
+  """Single message in conversation with AI model via OpenAI API."""
   role: str
-  content: str
+  # Content can be string or dict to support future features (images, etc.)
+  content: Union[str, Dict[str, Any]]
 
 
 class OpenAIRequest(BaseModel):
@@ -15,10 +16,12 @@ class OpenAIRequest(BaseModel):
   api_key: str
   model: str
   messages: List[Message]
-  headers: Optional[Dict[str, str]] = {}  # Empty dict is more consistent than None
+  # Empty dict is more consistent than None
+  headers: Optional[Dict[str, str]] = {}
   timeout: Optional[int] = 10
   
-  model_config = {"extra": "allow"}  # Allow additional fields for OpenAI parameters
+  # Allow additional fields for OpenAI parameters (temperature, max_tokens, etc.)
+  model_config = {"extra": "allow"}
 
 
 def validate_input(input_object: dict) -> bool:
@@ -43,10 +46,10 @@ def validate_input(input_object: dict) -> bool:
 
 def openai_wrapper(input_object: dict) -> dict:
   """
-  Generic OpenAI API wrapper that takes a complete request object and returns response.
+  Generic OpenAI API wrapper that takes a complete input object and returns response.
   
   Args:
-    input_object (dict): Complete request configuration including:
+    input_object (dict): Complete input configuration including:
       - api_key (str): OpenAI API key
       - model (str): Model name
       - messages (list): List of message objects with role and content
@@ -64,26 +67,31 @@ def openai_wrapper(input_object: dict) -> dict:
   # Validate input using Pydantic schema
   validate_input(input_object)
   
-  # Create complete request object at once
+  # Extract extra OpenAI parameters (temperature, max_tokens, etc.)
+  extra_params = {k: v for k, v in input_object.items() 
+                  if k not in ["api_key", "headers", "timeout"]}
+  
+  # Create complete request object for HTTP call
   request_object = {
     "method": "POST",
     "url": "https://api.openai.com/v1/chat/completions",
     "headers": {
       "Authorization": f"Bearer {input_object['api_key']}",
       "Content-Type": "application/json",
-      **input_object.get("headers", {})  # Merge additional headers
+      **input_object.get("headers", {})  # Merge additional headers with defaults
     },
+    # API payload for the request body
     "json": {
       "model": input_object["model"],
       "messages": input_object["messages"],
-      # Add any extra fields (temperature, max_tokens, etc.)
-      **{k: v for k, v in input_object.items() 
-         if k not in ["api_key", "headers", "timeout"]}
+      **extra_params  # Merge extra OpenAI parameters
     },
+    # Request timeout with default fallback
     "timeout": input_object.get("timeout", 10)
   }
   
   # Make the API call using the complete request object
   response = httpx.request(**request_object)
-  response.raise_for_status()  # Raises HTTPStatusError if status code indicates error
+  # Raises HTTPStatusError if status code indicates error
+  response.raise_for_status()
   return response.json()
