@@ -1,55 +1,68 @@
 """Unit tests for openai_wrapper module using mocked API calls."""
 import json
-from unittest.mock import MagicMock, patch
 
 import pytest
-from httpx import Response
 
 from openai_wrapper import openai_wrapper
 
 
 def create_mock_response(content: str = "Hello! How can I help you?", status_code: int = 200):
-  """Create a mock httpx Response object."""
-  mock_response = MagicMock(spec=Response)
-  mock_response.status_code = status_code
-  mock_response.headers = {"content-type": "application/json"}
-  
-  # Mock successful OpenAI API response format
-  response_data = {
-    "id": "chatcmpl-test123",
-    "object": "chat.completion",
-    "created": 1699123456,
-    "model": "gpt-4o-mini",
-    "choices": [
-      {
-        "index": 0,
-        "message": {
-          "role": "assistant",
-          "content": content
-        },
-        "finish_reason": "stop"
+  """Create a mock response object that mimics httpx.Response behavior."""
+  class MockResponse:
+    def __init__(self, content, status_code):
+      self.status_code = status_code
+      self.headers = {"content-type": "application/json"}
+      self._content = content
+      
+    def json(self):
+      # Mock successful OpenAI API response format
+      return {
+        "id": "chatcmpl-test123",
+        "object": "chat.completion", 
+        "created": 1699123456,
+        "model": "gpt-4o-mini",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": self._content
+            },
+            "finish_reason": "stop"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 15,
+          "total_tokens": 25
+        }
       }
-    ],
-    "usage": {
-      "prompt_tokens": 10,
-      "completion_tokens": 15,
-      "total_tokens": 25
-    }
-  }
+      
+    def raise_for_status(self):
+      if self.status_code >= 400:
+        raise Exception(f"Client error '{self.status_code} Unauthorized'")
+        
+    @property
+    def text(self):
+      return json.dumps(self.json())
   
-  mock_response.json.return_value = response_data
-  mock_response.text = json.dumps(response_data)
-  return mock_response
+  return MockResponse(content, status_code)
 
 
 class TestOpenAIWrapperUnit:
   """Unit tests for OpenAI wrapper with mocked API calls."""
   
-  @patch('openai_wrapper.httpx.request')
-  def test_basic_request_structure(self, mock_request):
+  def test_basic_request_structure(self, monkeypatch):
     """Test that the wrapper creates correct HTTP request structure."""
-    # Setup mock response
-    mock_request.return_value = create_mock_response()
+    # Capture the request arguments
+    captured_request = {}
+    
+    def mock_request(**kwargs):
+      captured_request.update(kwargs)
+      return create_mock_response()
+    
+    # Use monkeypatch to replace httpx.request
+    monkeypatch.setattr("openai_wrapper.httpx.request", mock_request)
     
     # Test input
     input_object = {
@@ -64,20 +77,16 @@ class TestOpenAIWrapperUnit:
     response = openai_wrapper(input_object)
     
     # Verify HTTP request was made correctly
-    mock_request.assert_called_once()
-    call_kwargs = mock_request.call_args[1]  # Get keyword arguments
-    
-    # Check method and URL
-    assert call_kwargs['method'] == "POST"
-    assert call_kwargs['url'] == "https://api.openai.com/v1/chat/completions"
+    assert captured_request['method'] == "POST"
+    assert captured_request['url'] == "https://api.openai.com/v1/chat/completions"
     
     # Check headers
-    headers = call_kwargs['headers']
+    headers = captured_request['headers']
     assert headers['Authorization'] == "Bearer sk-test123"
     assert headers['Content-Type'] == "application/json"
     
     # Check request payload
-    json_data = call_kwargs['json']
+    json_data = captured_request['json']
     assert json_data['model'] == "gpt-4o-mini"
     assert json_data['messages'] == [{"role": "user", "content": "Hello, OpenAI!"}]
     
@@ -87,10 +96,15 @@ class TestOpenAIWrapperUnit:
     assert "usage" in response
     assert response["choices"][0]["message"]["content"] == "Hello! How can I help you?"
 
-  @patch('openai_wrapper.httpx.request')
-  def test_additional_parameters(self, mock_request):
+  def test_additional_parameters(self, monkeypatch):
     """Test that additional parameters are passed correctly."""
-    mock_request.return_value = create_mock_response()
+    captured_request = {}
+    
+    def mock_request(**kwargs):
+      captured_request.update(kwargs)
+      return create_mock_response()
+    
+    monkeypatch.setattr("openai_wrapper.httpx.request", mock_request)
     
     input_object = {
       "api_key": "sk-test123",
@@ -104,9 +118,7 @@ class TestOpenAIWrapperUnit:
     openai_wrapper(input_object)
     
     # Check that additional parameters were included in request
-    call_kwargs = mock_request.call_args[1]
-    json_data = call_kwargs['json']
-    
+    json_data = captured_request['json']
     assert json_data['temperature'] == 0.7
     assert json_data['max_tokens'] == 100
     assert json_data['top_p'] == 0.9
@@ -148,15 +160,12 @@ class TestOpenAIWrapperUnit:
         "messages": [{"invalid": "message format"}]  # Missing role and content
       })
 
-  @patch('openai_wrapper.httpx.request')
-  def test_http_error_handling(self, mock_request):
+  def test_http_error_handling(self, monkeypatch):
     """Test handling of HTTP errors."""
-    # Mock HTTP error response
-    mock_response = MagicMock(spec=Response)
-    mock_response.status_code = 401
-    mock_response.text = '{"error": {"message": "Invalid API key"}}'
-    mock_response.raise_for_status.side_effect = Exception("Client error '401 Unauthorized'")
-    mock_request.return_value = mock_response
+    def mock_request(**kwargs):
+      return create_mock_response("Error", status_code=401)
+    
+    monkeypatch.setattr("openai_wrapper.httpx.request", mock_request)
     
     input_object = {
       "api_key": "invalid-key",
@@ -167,10 +176,15 @@ class TestOpenAIWrapperUnit:
     with pytest.raises(Exception, match="401 Unauthorized"):
       openai_wrapper(input_object)
 
-  @patch('openai_wrapper.httpx.request')
-  def test_custom_headers_and_timeout(self, mock_request):
+  def test_custom_headers_and_timeout(self, monkeypatch):
     """Test that custom headers and timeout are applied."""
-    mock_request.return_value = create_mock_response()
+    captured_request = {}
+    
+    def mock_request(**kwargs):
+      captured_request.update(kwargs)
+      return create_mock_response()
+    
+    monkeypatch.setattr("openai_wrapper.httpx.request", mock_request)
     
     input_object = {
       "api_key": "sk-test123",
@@ -182,21 +196,22 @@ class TestOpenAIWrapperUnit:
     
     openai_wrapper(input_object)
     
-    call_kwargs = mock_request.call_args[1]
-    
     # Check timeout
-    assert call_kwargs['timeout'] == 30
+    assert captured_request['timeout'] == 30
     
     # Check custom headers are included
-    headers = call_kwargs['headers']
+    headers = captured_request['headers']
     assert headers['Custom-Header'] == "test-value"
     assert headers['Authorization'] == "Bearer sk-test123"  # Still includes auth
 
-  @patch('openai_wrapper.httpx.request') 
-  def test_response_parsing(self, mock_request):
+  def test_response_parsing(self, monkeypatch):
     """Test that responses are parsed correctly."""
     test_content = "This is a test response from the API."
-    mock_request.return_value = create_mock_response(content=test_content)
+    
+    def mock_request(**kwargs):
+      return create_mock_response(content=test_content)
+    
+    monkeypatch.setattr("openai_wrapper.httpx.request", mock_request)
     
     input_object = {
       "api_key": "sk-test123",
