@@ -136,21 +136,6 @@ class TestOpenAIWrapperUnit:
     # Test missing messages
     with pytest.raises(ValueError, match="Missing required field: messages"):
       openai_wrapper({"api_key": "test", "model": "gpt-4o-mini"})
-
-  def test_missing_required_fields_validation(self):
-    """Test validation of required fields without making API calls."""
-    # Test missing api_key
-    with pytest.raises(ValueError, match="Missing required field: api_key"):
-      openai_wrapper({"model": "gpt-4o-mini", "messages": []})
-    
-    # Test missing model
-    with pytest.raises(ValueError, match="Missing required field: model"):
-      openai_wrapper({"api_key": "test", "messages": []})
-    
-    # Test missing messages
-    with pytest.raises(ValueError, match="Missing required field: messages"):
-      openai_wrapper({"api_key": "test", "model": "gpt-4o-mini"})
-
   def test_invalid_message_format(self):
     """Test validation of message structure."""
     with pytest.raises(ValueError):
