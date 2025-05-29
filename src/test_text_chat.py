@@ -1,5 +1,6 @@
 """Tests for text_chat module."""
 import os
+
 import pytest
 from dotenv import load_dotenv
 

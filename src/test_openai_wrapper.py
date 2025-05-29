@@ -1,5 +1,6 @@
 """Tests for openai_wrapper module."""
 import os
+
 import pytest
 from dotenv import load_dotenv
 
@@ -72,43 +73,43 @@ def test_openai_wrapper_basic():
     pytest.fail(f"OpenAI wrapper test failed: {e}")
 
 
-# def test_openai_wrapper_with_additional_params():
-#   """Test OpenAI wrapper with additional parameters."""
-#   input_object = {
-#     "api_key": OPENAI_API_KEY,
-#     "model": "gpt-4o-mini",
-#     "messages": [
-#       {"role": "user", "content": "Say exactly: 'Testing 123'"}
-#     ],
-#     "temperature": 0,
-#     "max_tokens": 10
-#   }
+def test_openai_wrapper_with_additional_params():
+  """Test OpenAI wrapper with additional parameters."""
+  input_object = {
+    "api_key": OPENAI_API_KEY,
+    "model": "gpt-4o-mini",
+    "messages": [
+      {"role": "user", "content": "Say exactly: 'Testing 123'"}
+    ],
+    "temperature": 0,
+    "max_tokens": 10
+  }
   
-#   try:
-#     response = openai_wrapper(input_object)
+  try:
+    response = openai_wrapper(input_object)
     
-#     # Basic structure tests
-#     assert isinstance(response, dict), f"Expected dict, got {type(response)}"
-#     assert "choices" in response, "Response missing 'choices' field"
+    # Basic structure tests
+    assert isinstance(response, dict), f"Expected dict, got {type(response)}"
+    assert "choices" in response, "Response missing 'choices' field"
     
-#     # Test that additional params were applied
-#     content = response["choices"][0]["message"]["content"]
-#     assert isinstance(content, str), f"Expected str content, got {type(content)}"
+    # Test that additional params were applied
+    content = response["choices"][0]["message"]["content"]
+    assert isinstance(content, str), f"Expected str content, got {type(content)}"
     
-#   except Exception as e:
-#     pytest.fail(f"OpenAI wrapper with additional params test failed: {e}")
+  except Exception as e:
+    pytest.fail(f"OpenAI wrapper with additional params test failed: {e}")
 
 
-# def test_openai_wrapper_missing_fields():
-#   """Test OpenAI wrapper error handling for missing required fields."""
-#   # Test missing api_key
-#   with pytest.raises(ValueError, match="Missing required field: api_key"):
-#     openai_wrapper({"model": "gpt-4o-mini", "messages": []})
+def test_openai_wrapper_missing_fields():
+  """Test OpenAI wrapper error handling for missing required fields."""
+  # Test missing api_key
+  with pytest.raises(ValueError, match="Missing required field: api_key"):
+    openai_wrapper({"model": "gpt-4o-mini", "messages": []})
   
-#   # Test missing model
-#   with pytest.raises(ValueError, match="Missing required field: model"):
-#     openai_wrapper({"api_key": "test", "messages": []})
+  # Test missing model
+  with pytest.raises(ValueError, match="Missing required field: model"):
+    openai_wrapper({"api_key": "test", "messages": []})
   
-#   # Test missing messages
-#   with pytest.raises(ValueError, match="Missing required field: messages"):
-#     openai_wrapper({"api_key": "test", "model": "gpt-4o-mini"})
+  # Test missing messages
+  with pytest.raises(ValueError, match="Missing required field: messages"):
+    openai_wrapper({"api_key": "test", "model": "gpt-4o-mini"})

@@ -1,10 +1,11 @@
 """OpenAI API wrapper with direct dictionary input/output."""
 # HTTP client for making API requests
+# Type hints
+from typing import Any, Dict, List, Optional, Union
+
 import httpx
 # Data validation and parsing
 from pydantic import BaseModel, ValidationError
-# Type hints
-from typing import List, Dict, Any, Optional, Union
 
 
 class Message(BaseModel):
