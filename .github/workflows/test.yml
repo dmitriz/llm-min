@@ -3,7 +3,7 @@ name: Test
 on:
   push:
   workflow_dispatch:
-    
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -28,6 +28,8 @@ jobs:
         uv sync --group tools
 
     - name: Run tests
+      env:
+        OPENAI_API_KEY: sk-dummy-key-for-testing
       run: uv run test
 
     - name: Check import sorting
