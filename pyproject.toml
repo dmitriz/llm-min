@@ -19,6 +19,9 @@ python_functions = "test_*"
 addopts = "-v --tb=short"
 
 [dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
 tools = [
     "pytest>=7.0.0",
     "isort>=6.0.1",
