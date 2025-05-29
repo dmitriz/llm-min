@@ -8,10 +8,10 @@ from openai_wrapper import openai_wrapper
 
 # Load environment variables from .env file
 load_dotenv()
-
 # Get OpenAI API key from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
+    pytest.skip("OPENAI_API_KEY environment variable not set")
   raise EnvironmentError("OPENAI_API_KEY not found. Create .env file with OPENAI_API_KEY=your_key")
 
 
@@ -70,7 +70,7 @@ def test_openai_wrapper_basic():
     assert "total_tokens" in usage, "Usage missing 'total_tokens' field"
     
   except Exception as e:
-    pytest.fail(f"OpenAI wrapper test failed: {e}")
+    pytest.fail(f"OpenAI wrapper test failed with {type(e).__name__}: {e}")
 
 
 def test_openai_wrapper_with_additional_params():

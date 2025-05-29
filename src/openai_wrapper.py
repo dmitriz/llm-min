@@ -66,8 +66,11 @@ def openai_wrapper(input_object: dict) -> dict:
       - headers (dict, optional): Additional headers to merge
       - timeout (int, optional): Request timeout in seconds
       - Any additional OpenAI parameters (temperature, max_tokens, etc.)
-      
-  Returns:
+  response.raise_for_status()
+  try:
+    return response.json()
+  except ValueError as e:
+    raise ValueError(f"Invalid JSON response from OpenAI API: {e}")
     dict: Complete API response object as returned by OpenAI
     
   Raises:
