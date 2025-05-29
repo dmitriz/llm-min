@@ -7,6 +7,9 @@ import httpx
 # Data validation and parsing
 from pydantic import BaseModel, ValidationError
 
+# Constants
+DEFAULT_TIMEOUT = 10
+
 
 class Message(BaseModel):
   """Single message in conversation with AI model via OpenAI API."""
@@ -22,7 +25,7 @@ class OpenAIRequest(BaseModel):
   messages: List[Message]
   # Empty dict is more consistent than None
   headers: Optional[Dict[str, str]] = {}
-  timeout: Optional[int] = 10
+  timeout: Optional[int] = DEFAULT_TIMEOUT
   
 
 def validate_input(input_object: dict) -> bool:
@@ -95,7 +98,7 @@ def openai_wrapper(input_object: dict) -> dict:
           if k not in ["api_key", "headers", "timeout"]}
     },
     # Request timeout with default fallback
-    "timeout": input_object.get("timeout", 10)
+    "timeout": input_object.get("timeout", DEFAULT_TIMEOUT)
   }
   
   # Make the API call using the complete request object
