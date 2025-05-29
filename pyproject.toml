@@ -5,6 +5,7 @@ description = "Minimal LLM chat interface for OpenAI"
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.28.1",
+    "python-dotenv>=1.0.0",
 ]
 
 [tool.uv]

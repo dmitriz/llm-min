@@ -1,13 +1,17 @@
 """Tests for text_chat module."""
 import os
 import pytest
+from dotenv import load_dotenv
 
 from text_chat import DEFAULT_MODEL, text_chat
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Get API key from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
-  raise EnvironmentError("OPENAI_API_KEY not found in environment. Set it via: export OPENAI_API_KEY=your_key")
+  raise EnvironmentError("OPENAI_API_KEY not found. Create .env file with OPENAI_API_KEY=your_key")
 
 def test_openai_chat():
   """Test OpenAI API integration with default model."""
