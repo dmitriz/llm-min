@@ -34,10 +34,10 @@ tools = [
 
 [project.scripts]
 # Run only unit tests (fast, no API key needed) - default for CI/CD
-test-unit = "openai_wrapper:run_unit_tests"
+test-unit = "test_runner:run_unit_tests"
 # Run only end-to-end tests (slow, requires API key)
-test-e2e = "openai_wrapper:run_e2e_tests"
+test-e2e = "test_runner:run_e2e_tests"
 # Run all tests (unit + e2e)
-test-all = "openai_wrapper:run_all_tests"
+test-all = "test_runner:run_all_tests"
 # 'uv run lint' will run isort to sort imports
 lint = "isort.main:main"

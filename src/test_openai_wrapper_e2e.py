@@ -14,7 +14,6 @@ if not OPENAI_API_KEY:
   pytest.skip("OPENAI_API_KEY environment variable not set", allow_module_level=True)
 
 
-@pytest.mark.e2e
 def test_openai_wrapper_basic():
   """Test OpenAI wrapper with basic input object."""
   # Set up input object with all required data

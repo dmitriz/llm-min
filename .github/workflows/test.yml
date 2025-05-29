@@ -29,6 +29,8 @@ jobs:
 
     - name: Run unit tests
       run: uv run test-unit
+      env:
+        OPENAI_API_KEY: dummy_key_for_testing
 
     - name: Check import sorting
       run: uv run lint --check-only .
