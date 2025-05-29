@@ -1,6 +1,4 @@
-openai>=1.0.0
+httpx>=0.28.1
 
 # Development dependencies for code formatting and linting
-ruff>=0.1.0
-black>=23.0.0
 isort>=5.12.0
