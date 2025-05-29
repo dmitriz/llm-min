@@ -14,6 +14,7 @@ if not OPENAI_API_KEY:
   pytest.skip("OPENAI_API_KEY environment variable not set", allow_module_level=True)
 
 
+@pytest.mark.e2e
 def test_openai_wrapper_basic():
   """Test OpenAI wrapper with basic input object."""
   # Set up input object with all required data
@@ -72,6 +73,7 @@ def test_openai_wrapper_basic():
     pytest.fail(f"OpenAI wrapper test failed with {type(e).__name__}: {e}")
 
 
+@pytest.mark.e2e
 def test_openai_wrapper_with_additional_params():
   """Test OpenAI wrapper with additional parameters."""
   input_object = {
@@ -99,6 +101,7 @@ def test_openai_wrapper_with_additional_params():
     pytest.fail(f"OpenAI wrapper with additional params test failed: {e}")
 
 
+@pytest.mark.e2e
 def test_openai_wrapper_missing_fields():
   """Test OpenAI wrapper error handling for missing required fields."""
   # Test missing api_key

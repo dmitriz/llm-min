@@ -17,7 +17,11 @@ testpaths = ["src"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --tb=short"
+addopts = "-v --tb=short -m 'not e2e'"
+markers = [
+  "unit: marks tests as unit tests (no external dependencies)",
+  "e2e: marks tests as end-to-end tests (requires API keys)",
+]
 
 [dependency-groups]
 dev = [
@@ -29,7 +33,7 @@ tools = [
 ]
 
 [project.scripts]
-# 'uv run test' will run pytest, avoiding the broken py.test entry point
+# 'uv run test' will run only unit tests by default (fast, no API key needed)
 test = "pytest:main"
 # 'uv run lint' will run isort to sort imports
 lint = "isort.main:main"

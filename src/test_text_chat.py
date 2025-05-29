@@ -14,6 +14,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
   pytest.skip("OPENAI_API_KEY environment variable not set", allow_module_level=True)
 
+@pytest.mark.e2e
 def test_openai_chat():
   """Test OpenAI API integration with default model."""
   try:
