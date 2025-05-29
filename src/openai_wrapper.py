@@ -1,5 +1,44 @@
 """OpenAI API wrapper with direct dictionary input/output."""
 import httpx
+from pydantic import BaseModel, ValidationError
+from typing import List, Dict, Any, Optional
+
+
+class Message(BaseModel):
+  """Single message in the conversation."""
+  role: str
+  content: str
+
+
+class OpenAIRequest(BaseModel):
+  """Schema for OpenAI API request input."""
+  api_key: str
+  model: str
+  messages: List[Message]
+  headers: Optional[Dict[str, str]] = None
+  timeout: Optional[int] = 10
+  # Allow additional fields for OpenAI parameters
+  class Config:
+    extra = "allow"
+
+
+def validate_input(input_object: dict) -> OpenAIRequest:
+  """
+  Validate input object against OpenAI request schema.
+  
+  Args:
+    input_object (dict): Raw input dictionary
+    
+  Returns:
+    OpenAIRequest: Validated request object
+    
+  Raises:
+    ValidationError: If input doesn't match schema
+  """
+  try:
+    return OpenAIRequest(**input_object)
+  except ValidationError as e:
+    raise ValueError(f"Invalid input object: {e}") from e
 
 
 def openai_wrapper(input_object: dict) -> dict:
@@ -9,62 +48,42 @@ def openai_wrapper(input_object: dict) -> dict:
   Args:
     input_object (dict): Complete request configuration including:
       - api_key (str): OpenAI API key
-      - model (str): Model name
-      - messages (list): List of message objects
-      - headers (dict, optional): Additional headers
+      - model (str): Model name  
+      - messages (list): List of message objects with role and content
+      - headers (dict, optional): Additional headers to merge
       - timeout (int, optional): Request timeout in seconds
+      - Any additional OpenAI parameters (temperature, max_tokens, etc.)
       
   Returns:
     dict: Complete API response object as returned by OpenAI
     
   Raises:
-    httpx.HTTPStatusError: If HTTP request fails
     ValueError: If input object is malformed
+    httpx.HTTPStatusError: If HTTP request fails
   """
-  # Extract required fields
-  api_key = input_object.get("api_key")
-  if not api_key:
-    raise ValueError("Missing required field: api_key")
-    
-  model = input_object.get("model")
-  if not model:
-    raise ValueError("Missing required field: model")
-    
-  messages = input_object.get("messages")
-  if not messages:
-    raise ValueError("Missing required field: messages")
+  # Validate input using Pydantic schema
+  validated = validate_input(input_object)
   
-  # Build headers
-  headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
+  # Create complete request object at once
+  request_object = {
+    "method": "POST",
+    "url": "https://api.openai.com/v1/chat/completions",
+    "headers": {
+      "Authorization": f"Bearer {validated.api_key}",
+      "Content-Type": "application/json",
+      **(validated.headers or {})  # Merge additional headers
+    },
+    "json": {
+      "model": validated.model,
+      "messages": [msg.dict() for msg in validated.messages],
+      # Add any extra fields (temperature, max_tokens, etc.)
+      **{k: v for k, v in validated.dict().items() 
+         if k not in ["api_key", "headers", "timeout"]}
+    },
+    "timeout": validated.timeout
   }
   
-  # Add any additional headers from input
-  if "headers" in input_object:
-    headers.update(input_object["headers"])
-  
-  # Build request payload
-  payload = {
-    "model": model,
-    "messages": messages
-  }
-  
-  # Add any additional payload fields (temperature, max_tokens, etc.)
-  for key, value in input_object.items():
-    if key not in ["api_key", "headers", "timeout"] and key not in payload:
-      payload[key] = value
-  
-  # Get timeout
-  timeout = input_object.get("timeout", 10)
-  
-  # Make the request
-  response = httpx.post(
-    "https://api.openai.com/v1/chat/completions",
-    headers=headers,
-    json=payload,
-    timeout=timeout
-  )
-  
+  # Make the API call using the complete request object
+  response = httpx.request(**request_object)
   response.raise_for_status()
   return response.json()

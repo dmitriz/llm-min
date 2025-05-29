@@ -29,7 +29,7 @@ def test_openai_wrapper_basic():
     # Call the wrapper with the input object
     response = openai_wrapper(input_object)
     
-    # Test that we get a complete response object
+    # Test that we get a complete response object (dictionary)
     assert isinstance(response, dict), f"Expected dict, got {type(response)}"
     
     # Test standard OpenAI response structure
@@ -44,23 +44,25 @@ def test_openai_wrapper_basic():
     assert isinstance(choices, list), "Choices should be a list"
     assert len(choices) > 0, "Choices array is empty"
     
+    # Test first choice structure - this is where the actual response content is
     first_choice = choices[0]
     assert "message" in first_choice, "Choice missing 'message' field"
     assert "finish_reason" in first_choice, "Choice missing 'finish_reason' field"
     
-    # Test message structure
+    # Test message structure - contains the AI's actual response
     message = first_choice["message"]
     assert "role" in message, "Message missing 'role' field"
     assert "content" in message, "Message missing 'content' field"
     assert message["role"] == "assistant", f"Expected role 'assistant', got {message['role']}"
     
-    # Test content quality
+    # Test content quality - the actual text response from AI
     content = message["content"]
     assert isinstance(content, str), f"Expected str content, got {type(content)}"
     assert len(content) > 5, f"Response too short: {len(content)} chars"
     assert content.strip(), "Response is empty or whitespace only"
     
-    # Test usage structure
+    # Test 'usage' field - important for tracking token consumption and costs
+    assert "usage" in response, "Response missing 'usage' field"
     usage = response["usage"]
     assert "prompt_tokens" in usage, "Usage missing 'prompt_tokens' field"
     assert "completion_tokens" in usage, "Usage missing 'completion_tokens' field"
