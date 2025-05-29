@@ -41,10 +41,37 @@ uv run pytest
 uv run pytest -v
 
 # Run specific test file
-uv run pytest tests/test_text_chat.py
+uv run pytest src/test_text_chat.py
 
-# Run tests with coverage
+# Run tests with coverage (requires: uv add --group test pytest-cov)
 uv run pytest --cov=src
+
+# Run tests in watch mode (requires: uv add --group test pytest-watch)
+uv run ptw
+
+# Run Python directly (for testing code interactively)
+uv run python
+
+# Run specific Python scripts
+uv run python src/text_chat.py
+```
+
+### Available UV Commands
+
+When you run `uv run <command>`, these are the main commands available:
+
+- **`pytest`** - Run your tests (recommended)
+- **`python`** - Run Python interpreter with your project dependencies
+- **`pydoc`** - Python documentation tool
+
+### Running Your Code
+
+```bash
+# Interactive Python with your project loaded
+uv run python
+
+# Run a specific script
+uv run python -c "from src.text_chat import text_chat; print('Library loaded!')"
 ```
 
 ### Why UV?
