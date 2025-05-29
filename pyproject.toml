@@ -24,7 +24,6 @@ tools = [
 ]
 
 [project.scripts]
-# Custom scripts to invoke tools via uv run
 # 'uv run test' will run pytest, avoiding the broken py.test entry point
 test = "pytest:main"
 # 'uv run lint' will run isort to sort imports
