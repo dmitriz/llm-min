@@ -1,7 +1,10 @@
 """OpenAI API wrapper with direct dictionary input/output."""
-import httpx  # HTTP client for making API requests
-from pydantic import BaseModel, ValidationError  # Data validation and parsing
-from typing import List, Dict, Any, Optional, Union  # Type hints
+# HTTP client for making API requests
+import httpx
+# Data validation and parsing
+from pydantic import BaseModel, ValidationError
+# Type hints
+from typing import List, Dict, Any, Optional, Union
 
 
 class Message(BaseModel):
@@ -20,9 +23,6 @@ class OpenAIRequest(BaseModel):
   headers: Optional[Dict[str, str]] = {}
   timeout: Optional[int] = 10
   
-  # Allow additional fields for OpenAI parameters (temperature, max_tokens, etc.)
-  model_config = {"extra": "allow"}
-
 
 def validate_input(input_object: dict) -> bool:
   """
@@ -68,8 +68,6 @@ def openai_wrapper(input_object: dict) -> dict:
   validate_input(input_object)
   
   # Extract extra OpenAI parameters (temperature, max_tokens, etc.)
-  extra_params = {k: v for k, v in input_object.items() 
-                  if k not in ["api_key", "headers", "timeout"]}
   
   # Create complete request object for HTTP call
   request_object = {
@@ -78,13 +76,16 @@ def openai_wrapper(input_object: dict) -> dict:
     "headers": {
       "Authorization": f"Bearer {input_object['api_key']}",
       "Content-Type": "application/json",
-      **input_object.get("headers", {})  # Merge additional headers with defaults
+      # Merge additional headers with defaults
+      **input_object.get("headers", {})
     },
     # API payload for the request body
     "json": {
       "model": input_object["model"],
       "messages": input_object["messages"],
-      **extra_params  # Merge extra OpenAI parameters
+      # Merge extra OpenAI parameters
+      **{k: v for k, v in input_object.items() 
+          if k not in ["api_key", "headers", "timeout"]}
     },
     # Request timeout with default fallback
     "timeout": input_object.get("timeout", 10)
