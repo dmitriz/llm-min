@@ -15,14 +15,13 @@ class OpenAIRequest(BaseModel):
   api_key: str
   model: str
   messages: List[Message]
-  headers: Optional[Dict[str, str]] = None
+  headers: Optional[Dict[str, str]] = {}  # Empty dict is more consistent than None
   timeout: Optional[int] = 10
-  # Allow additional fields for OpenAI parameters
-  class Config:
-    extra = "allow"
+  
+  model_config = {"extra": "allow"}  # Allow additional fields for OpenAI parameters
 
 
-def validate_input(input_object: dict) -> OpenAIRequest:
+def validate_input(input_object: dict) -> bool:
   """
   Validate input object against OpenAI request schema.
   
@@ -30,13 +29,14 @@ def validate_input(input_object: dict) -> OpenAIRequest:
     input_object (dict): Raw input dictionary
     
   Returns:
-    OpenAIRequest: Validated request object
+    bool: True if valid, raises ValueError if invalid
     
   Raises:
-    ValidationError: If input doesn't match schema
+    ValueError: If input doesn't match schema
   """
   try:
-    return OpenAIRequest(**input_object)
+    OpenAIRequest(**input_object)
+    return True
   except ValidationError as e:
     raise ValueError(f"Invalid input object: {e}") from e
 
@@ -48,7 +48,7 @@ def openai_wrapper(input_object: dict) -> dict:
   Args:
     input_object (dict): Complete request configuration including:
       - api_key (str): OpenAI API key
-      - model (str): Model name  
+      - model (str): Model name
       - messages (list): List of message objects with role and content
       - headers (dict, optional): Additional headers to merge
       - timeout (int, optional): Request timeout in seconds
@@ -62,28 +62,28 @@ def openai_wrapper(input_object: dict) -> dict:
     httpx.HTTPStatusError: If HTTP request fails
   """
   # Validate input using Pydantic schema
-  validated = validate_input(input_object)
+  validate_input(input_object)
   
   # Create complete request object at once
   request_object = {
     "method": "POST",
     "url": "https://api.openai.com/v1/chat/completions",
     "headers": {
-      "Authorization": f"Bearer {validated.api_key}",
+      "Authorization": f"Bearer {input_object['api_key']}",
       "Content-Type": "application/json",
-      **(validated.headers or {})  # Merge additional headers
+      **input_object.get("headers", {})  # Merge additional headers
     },
     "json": {
-      "model": validated.model,
-      "messages": [msg.dict() for msg in validated.messages],
+      "model": input_object["model"],
+      "messages": input_object["messages"],
       # Add any extra fields (temperature, max_tokens, etc.)
-      **{k: v for k, v in validated.dict().items() 
+      **{k: v for k, v in input_object.items() 
          if k not in ["api_key", "headers", "timeout"]}
     },
-    "timeout": validated.timeout
+    "timeout": input_object.get("timeout", 10)
   }
   
   # Make the API call using the complete request object
   response = httpx.request(**request_object)
-  response.raise_for_status()
+  response.raise_for_status()  # Raises HTTPStatusError if status code indicates error
   return response.json()
