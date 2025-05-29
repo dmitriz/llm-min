@@ -42,6 +42,12 @@ def validate_input(input_object: dict) -> bool:
     OpenAIRequest(**input_object)
     return True
   except ValidationError as e:
+    # Parse validation errors to provide specific field missing messages
+    for error in e.errors():
+      if error['type'] == 'missing':
+        field_name = error['loc'][0] if error['loc'] else 'unknown'
+        raise ValueError(f"Missing required field: {field_name}") from e
+    # Fallback for other validation errors
     raise ValueError(f"Invalid input object: {e}") from e
 
 
