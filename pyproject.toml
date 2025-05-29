@@ -17,7 +17,7 @@ testpaths = ["src"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --tb=short -m 'not e2e'"
+addopts = "-v --tb=short"
 markers = [
   "unit: marks tests as unit tests (no external dependencies)",
   "e2e: marks tests as end-to-end tests (requires API keys)",
@@ -33,7 +33,11 @@ tools = [
 ]
 
 [project.scripts]
-# 'uv run test' will run only unit tests by default (fast, no API key needed)
-test = "pytest:main"
+# Run only unit tests (fast, no API key needed) - default for CI/CD
+test-unit = "openai_wrapper:run_unit_tests"
+# Run only end-to-end tests (slow, requires API key)
+test-e2e = "openai_wrapper:run_e2e_tests"
+# Run all tests (unit + e2e)
+test-all = "openai_wrapper:run_all_tests"
 # 'uv run lint' will run isort to sort imports
 lint = "isort.main:main"

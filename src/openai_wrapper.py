@@ -106,3 +106,26 @@ def openai_wrapper(input_object: dict) -> dict:
   # Raises HTTPStatusError if status code indicates error
   response.raise_for_status()
   return response.json()
+
+
+"""Test runner entry points."""
+import sys
+import subprocess
+
+
+def run_unit_tests():
+  """Entry point for running unit tests."""
+  result = subprocess.run([sys.executable, "-m", "pytest", "-m", "not e2e"], cwd=".")
+  sys.exit(result.returncode)
+
+
+def run_e2e_tests():
+  """Entry point for running e2e tests."""
+  result = subprocess.run([sys.executable, "-m", "pytest", "-m", "e2e"], cwd=".")
+  sys.exit(result.returncode)
+
+
+def run_all_tests():
+  """Entry point for running all tests."""
+  result = subprocess.run([sys.executable, "-m", "pytest"], cwd=".")
+  sys.exit(result.returncode)

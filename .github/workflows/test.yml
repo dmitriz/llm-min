@@ -27,10 +27,8 @@ jobs:
         uv sync --dev
         uv sync --group tools
 
-    - name: Run tests
-      env:
-        OPENAI_API_KEY: sk-dummy-key-for-testing
-      run: uv run test
+    - name: Run unit tests
+      run: uv run test-unit
 
     - name: Check import sorting
       run: uv run lint --check-only .
