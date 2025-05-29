@@ -148,25 +148,20 @@ dependencies = [
     { name = "httpx" },
 ]
 
-[package.optional-dependencies]
-test = [
+[package.dev-dependencies]
+tools = [
+    { name = "isort" },
     { name = "pytest" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "isort" },
-]
-
 [package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0.0" },
-]
-provides-extras = ["test"]
+requires-dist = [{ name = "httpx", specifier = ">=0.28.1" }]
 
 [package.metadata.requires-dev]
-dev = [{ name = "isort", specifier = ">=6.0.1" }]
+tools = [
+    { name = "isort", specifier = ">=6.0.1" },
+    { name = "pytest", specifier = ">=7.0.0" },
+]
 
 [[package]]
 name = "typing-extensions"

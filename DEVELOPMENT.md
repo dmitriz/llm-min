@@ -1,63 +1,12 @@
 # Development Guide
 
-## Package Management Standard
+## Package Management
 
-**This project uses UV for ALL package management operations.**
+This project uses **UV** for package management. UV is faster and more reliable than pip.
 
-UV is faster, more reliable, and provides better dependency resolution than pip.
+## Setup
 
-## What is UV?
-
-UV is a modern, fast Python package manager - think of it as a better replacement for pip. It's much faster and handles dependencies better.
-
-## Basic Setup (Required)
-
-```bash
-# Install your project dependencies
-uv sync
-```
-
-## Optional Development Tools
-
-### Currently installed tools
-
-#### isort (Import Organizer) - INSTALLED
-
-- **Purpose**: Sorts your import statements in a standard order
-- **When to use**: When you have many imports and want them organized
-- **Command**: `uv run isort src/`
-- **Example**: Puts standard library imports first, then third-party, then your own modules
-
-### Additional tools you can install if needed
-
-#### ruff (Code Checker + Formatter) - OPTIONAL
-
-- **Purpose**: Finds bugs that unit tests might miss (see ruff_examples.py for examples)
-- **Real bugs it catches**: Mutable default arguments, security issues with eval(), resource leaks
-- **Install**: `uv add --dev ruff`
-- **Command**: `uv run ruff check src/`
-
-#### black (Code Formatter) - OPTIONAL  
-
-- **Purpose**: Makes code look consistent (see black_examples.py for before/after)
-- **When useful**: When code becomes hard to read due to inconsistent formatting
-- **Install**: `uv add --dev black`
-- **Command**: `uv run black src/`
-
-## Do You Need These Tools?
-
-**For your current simple project**: Probably not necessary
-
-**You should consider them when**:
-
-- Your project has multiple files
-- You're working with others
-- You want to catch bugs early
-- You want professional-looking code
-
-The tools are configured to use 2-space indentation to match your preference.
-
-### Installation Commands
+## Package Management Commands
 
 ```bash
 # Install dependencies
@@ -69,20 +18,33 @@ uv sync --extra test
 # Add a new dependency
 uv add package-name
 
-# Add a development dependency
+# Add a development dependency  
 uv add --dev package-name
 
 # Add a test dependency
 uv add --group test package-name
-
-# Run scripts with UV
-uv run script-name
-
-# Run python with UV
-uv run python script.py
 ```
 
-### Testing
+## Available Commands
+
+All tools are organized in a single `tools` group in `pyproject.toml`:
+
+**Built-in commands:**
+
+- **`python`** - Python interpreter with project dependencies
+- **`pythonw`** - Python (Windows GUI version)
+- **`pydoc`** - Python documentation tool
+
+**Installed tools (from tools group):**
+
+- **`pytest`** - Run tests
+- **`isort`** - Sort import statements
+- **`isort-identify-imports`** - Import identification tool
+- **`httpx`** - HTTP client (from main dependencies)
+
+Note: `py.test` may appear in the command list but is broken - use `pytest` instead.
+
+## Testing
 
 ```bash
 # Run all tests
@@ -107,18 +69,10 @@ uv run python
 uv run python src/text_chat.py
 ```
 
-### Available UV Commands
-
-When you run `uv run <command>`, these are the main commands available:
-
-- **`pytest`** - Run your tests (recommended)
-- **`python`** - Run Python interpreter with your project dependencies
-- **`pydoc`** - Python documentation tool
-
-### Running Your Code
+## Running Code
 
 ```bash
-# Interactive Python with your project loaded
+# Interactive Python
 uv run python
 
 # Run a specific script

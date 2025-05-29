@@ -7,11 +7,6 @@ dependencies = [
     "httpx>=0.28.1",
 ]
 
-[project.optional-dependencies]
-test = [
-  "pytest>=7.0.0"
-]
-
 [tool.uv]
 package = true
 
@@ -23,6 +18,14 @@ python_functions = "test_*"
 addopts = "-v --tb=short"
 
 [dependency-groups]
-dev = [
+tools = [
+    "pytest>=7.0.0",
     "isort>=6.0.1",
 ]
+
+[project.scripts]
+# Custom scripts to invoke tools via uv run
+# 'uv run test' will run pytest, avoiding the broken py.test entry point
+test = "pytest:main"
+# 'uv run lint' will run isort to sort imports
+lint = "isort:main"
