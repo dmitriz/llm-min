@@ -7,15 +7,17 @@ OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
 def create_request_object(api_key: str, model: str, message: str) -> dict:
   """
-  Create a complete HTTP request object for OpenAI API.
+  Constructs a dictionary representing an HTTP POST request to the OpenAI chat completions API.
+  
+  The returned dictionary includes the request method, endpoint URL, authorization headers, and a JSON payload containing the specified model and user message.
   
   Args:
-    api_key (str): API key for OpenAI
-    model (str): Model name to use
-    message (str): User message
-    
+      api_key: The OpenAI API key for authentication.
+      model: The name of the OpenAI model to use.
+      message: The user message to send in the chat.
+  
   Returns:
-    dict: Complete request object with method, url, headers, and json payload
+      A dictionary suitable for use with HTTP client libraries to send a chat completion request.
   """
   return {
     "method": "POST",
@@ -32,17 +34,14 @@ def create_request_object(api_key: str, model: str, message: str) -> dict:
 
 def send_http_request(request_object):
   """
-  Send HTTP request using the request object.
-  
-  Args:
-    request_object (dict): Complete request object
-    
-  Returns:
-    str: Response content from OpenAI
+  Sends an HTTP request to the OpenAI API and returns the generated message content.
   
   Raises:
-    httpx.HTTPStatusError: If HTTP request fails
-    ValueError: If API response format is unexpected
+      httpx.HTTPStatusError: If the HTTP request fails.
+      ValueError: If the API response is missing expected fields or is improperly formatted.
+  
+  Returns:
+      The content of the first message choice from the API response.
   """
   response = httpx.request(**request_object, timeout=10)
   response.raise_for_status()
@@ -64,17 +63,30 @@ def send_http_request(request_object):
 
 def text_chat(api_key, model=DEFAULT_MODEL):
   """
-  Create a text chat function for OpenAI.
+  Creates a reusable chat function for sending messages to the OpenAI API.
   
   Args:
-    api_key (str): API key for OpenAI
-    model (str): Model name to use (default: gpt-4o-mini - cheapest option)
+      api_key: The OpenAI API key.
+      model: The model name to use for chat completions.
   
   Returns:
-    function: A send_message function that takes a message and returns a response
+      A function that takes a message string and returns the generated response from the OpenAI chat completions API.
   """
   def send_message(message):
     # Create complete request object
+    """
+    Sends a user message to the OpenAI chat completions API and returns the generated response.
+    
+    Args:
+        message: The user message to send to the chat model.
+    
+    Returns:
+        The content of the model's response as a string.
+    
+    Raises:
+        httpx.HTTPStatusError: If the HTTP request fails.
+        ValueError: If the API response format is invalid or missing expected fields.
+    """
     request_obj = create_request_object(api_key, model, message)
     
     # Send single HTTP request with the request object
